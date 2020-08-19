@@ -24,6 +24,7 @@ function BusImage(name) {
   this.url = `assets/${name}`;
   this.name = name.split('.')[0];
   this.views = 0;
+  this.previouslyViewed = false;
   BusImage.array.push(this)
 }
 
@@ -46,16 +47,36 @@ function makeRandom() {
 
 function renderPics() {
   let display = [];
+  //display[i] is an index dummy, you need to access that index of the array of objects
+
 
   display[0] = makeRandom();
+  console.log(display[0])
+  while (BusImage.array[display[0]].previouslyViewed === true) {
+    console.log('image one', display[0])
+    display[0] = makeRandom();
+  }
+  BusImage.array[display[0]].previouslyViewed = true;
+
+  // so this got tricky as far as order of operations, but essentially we check first index for a flag of true, until it is not true we call random. When the loop is finished we set the flag to true, to prevent it from becomig a candidate in the next cycle of checking for the 1 index, and so on
+
   display[1] = makeRandom();
-  while (display[0] === display[1]) {
+  while (BusImage.array[display[1]].previouslyViewed === true || display[1] === display[0]) {
+    console.log('image two', display[1])
     display[1] = makeRandom();
   }
+  BusImage.array[display[1]].previouslyViewed = true;
+
+
+
   display[2] = makeRandom();
-  while (display[0] === display[2] || display[1] === display[2]) {
+  while (BusImage.array[display[2]].previouslyViewed === true || display[1] === display[2] || display[0] === display[2]) {
+    console.log('image three', display[2])
     display[2] = makeRandom();
   }
+  BusImage.array[display[2]].previouslyViewed = true;
+
+
 
   BusImage.left.src = BusImage.array[display[0]].url;
   BusImage.left.alt = BusImage.array[display[0]].name;
@@ -71,6 +92,22 @@ function renderPics() {
   BusImage.right.alt = BusImage.array[display[2]].name;
   BusImage.right.id = BusImage.array[display[2]].name;
   BusImage.array[display[2]].views += 1;
+
+
+
+  //The next steps seem odd, and I am sure there is a better way, but this is what is happening. We had set the flags to true above to control the random aspect before being appended, now that is finished we set every flag to false again, this clears out any previous flags that are still considered true, like a reset, and then sets the current random indexes to true for the next handle click call
+
+
+  /* Set flags to empty, then set the current pics to true on the previous viewed flag */
+  for (let i = 0; i < BusImage.array.length; i++) {
+    BusImage.array[i].previouslyViewed = false;
+    //console.log(BusImage.array[i])
+  }
+  BusImage.array[display[0]].previouslyViewed = true;
+  BusImage.array[display[1]].previouslyViewed = true;
+  BusImage.array[display[2]].previouslyViewed = true;
+  console.log('after setting flags to true', BusImage.array)
+
 }
 
 /*Step 3, random is working and we are successfully changing the images in the DOM. Now, We need a click handler, and click counter, and some way to stop repeat images in the same 2 rounds. */
